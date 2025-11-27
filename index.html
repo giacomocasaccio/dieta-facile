@@ -1,413 +1,527 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, ChevronRight, CornerDownRight, Plus, Minus, Info } from 'lucide-react';
-
-const App = () => {
-    const [activePage, setActivePage] = useState('intro');
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
-
-    // --- DATI (Invariati) ---
-    const generalRules = [
-        "Le colazioni sono intercambiabili tra loro.",
-        "I pranzi e le cene sono intercambiabili.",
-        "I menù possono essere ripetuti liberamente.",
-        "Verdure di stagione (crude o cotte) sono libere.",
-        "Condimento giornaliero: 30g olio EVO (3 cucchiai)."
-    ];
-
-    const fruitSubs = [
-        { name: "Mela", amount: "150 g" },
-        { name: "Arance / Ciliegie", amount: "200 g" },
-        { name: "Albicocche / Pesche", amount: "250 g" },
-        { name: "Fragole", amount: "300 g" },
-        { name: "Cocomero", amount: "450 g" },
-        { name: "Banana / Uva", amount: "100 g" },
-    ];
-
-    const mealsData = {
-        breakfast: [
-            {
-                title: "Opzione Classica",
-                items: [
-                    { name: "Latte parz. scremato", amount: "150 g", subs: ["Yogurt magro 150 g"] },
-                    { name: "Fette biscottate", amount: "40 g", subs: ["Pane 50 g", "Biscotti 40 g", "Cereali 40 g"] }
-                ]
-            },
-            {
-                title: "Opzione Veloce",
-                items: [
-                    { name: "Tè o caffè", amount: "Libero", subs: [] },
-                    { name: "Biscotti secchi", amount: "50 g", subs: ["Fette biscottate 50 g", "Cracker 50 g"] }
-                ]
-            },
-            {
-                title: "Opzione Salata",
-                items: [
-                    { name: "Spremuta", amount: "150 g", subs: [] },
-                    { name: "Cracker", amount: "25 g", subs: ["Pane 35 g", "Grissini 30 g"] }
-                ]
-            }
-        ],
-        lunch: [
-            {
-                title: "Menù 1 (Tacchino)",
-                items: [
-                    { name: "Pasta al pomodoro", amount: "80 g", subs: ["Riso 80 g", "Gnocchi 200 g", "Pane 90 g"] },
-                    { name: "Petto di tacchino", amount: "80 g", subs: ["Carni magre 120 g", "Pesce magro 140 g"] },
-                    { name: "Mela", amount: "150 g", subs: ["Vedi tabella frutta"] },
-                    { name: "Pane", amount: "40 g", subs: ["Patate 150 g"] }
-                ]
-            },
-            {
-                title: "Menù 2 (Vitellone)",
-                items: [
-                    { name: "Pasta in brodo", amount: "40 g", subs: ["Riso 40 g"] },
-                    { name: "Vitellone", amount: "80 g", subs: ["Carni magre 80 g", "Pesce magro 100 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "100 g", subs: ["Patate 200 g + Pane 45 g"] }
-                ]
-            },
-            {
-                title: "Menù 3 (Trota)",
-                items: [
-                    { name: "Pasta e fagioli", amount: "50g + 30g", subs: ["Riso e piselli"] },
-                    { name: "Trota", amount: "110 g", subs: ["Pesce magro 110 g", "Carni magre 90 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "70 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 4 (Tortellini)",
-                items: [
-                    { name: "Tortellini", amount: "110 g", subs: ["Lasagne 280 g", "Riso freddo 170 g"] },
-                    { name: "Prosciutto crudo", amount: "20 g", subs: ["Bresaola 50 g"] },
-                    { name: "Mela", amount: "300 g", subs: ["Doppia razione frutta"] },
-                    { name: "Pane", amount: "60 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 5 (Sogliola)",
-                items: [
-                    { name: "Riso al pomodoro", amount: "80 g", subs: ["Pasta 80 g"] },
-                    { name: "Sogliola ai ferri", amount: "100 g", subs: ["Pesce magro 100 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "40 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 6 (Veloce)",
-                items: [
-                    { name: "Pane", amount: "150 g", subs: [] },
-                    { name: "Prosciutto cotto", amount: "100 g", subs: ["Mozzarella 120 g", "Tonno 80 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] }
-                ]
-            }
-        ],
-        dinner: [
-            {
-                title: "Menù 1 (Prosciutto)",
-                items: [
-                    { name: "Pasta in brodo", amount: "40 g", subs: ["Riso 40 g"] },
-                    { name: "Prosciutto crudo", amount: "70 g", subs: ["Mozzarella 100 g", "2 Uova"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "40 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 2 (Mozzarella)",
-                items: [
-                    { name: "Zuppa con riso", amount: "20 g riso", subs: ["Minestrone + 15g pasta"] },
-                    { name: "Mozzarella", amount: "100 g", subs: ["Stracchino 70 g", "Ricotta 150 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "60 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 3 (Formaggi)",
-                items: [
-                    { name: "Riso in brodo", amount: "40 g", subs: [] },
-                    { name: "Parmigiano", amount: "50 g", subs: ["Formaggi stagionati 50 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "40 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 4 (Vitello)",
-                items: [
-                    { name: "Pasta in brodo", amount: "40 g", subs: [] },
-                    { name: "Vitello ai ferri", amount: "120 g", subs: ["Pesce 140 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "50 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 5 (Cotto)",
-                items: [
-                    { name: "Pasta pomodoro", amount: "60 g", subs: [] },
-                    { name: "Prosciutto cotto", amount: "60 g", subs: ["Tonno 80 g"] },
-                    { name: "Mela", amount: "150 g", subs: [] },
-                    { name: "Pane", amount: "30 g", subs: [] }
-                ]
-            },
-            {
-                title: "Menù 6 (Pizza)",
-                items: [
-                    { name: "Pizza margherita", amount: "160 g", subs: [] },
-                    { name: "Prosciutto cotto", amount: "60 g", subs: [] },
-                    { name: "Mela", amount: "150 g", subs: [] }
-                ]
-            }
-        ]
-    };
-
-    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
-
-    const renderContent = () => {
-        if (activePage === 'intro') {
-            return (
-                <div className="animate-fade-in max-w-3xl mx-auto pt-6 px-4 md:px-12 pb-24 font-sans text-gray-900">
-                    <div className="mb-8 text-center bg-green-50 p-6 rounded-2xl border border-green-100">
-                        <div className="text-6xl mb-4">🥗</div>
-                        <h1 className="text-3xl font-extrabold text-green-800 mb-2">Guida alla Dieta</h1>
-                        <p className="text-green-700 text-xl">ASST Garda - 1600 Kcal</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                            <Info className="text-blue-500" size={32} />
-                            Regole Importanti
-                        </h2>
-                        <ul className="space-y-4">
-                            {generalRules.map((r, i) => (
-                                <li key={i} className="flex gap-4 text-lg leading-relaxed items-start">
-                                    <div className="min-w-[10px] h-[10px] mt-2.5 rounded-full bg-blue-400"></div>
-                                    {r}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4 px-2">Sostituzioni Frutta 🍎</h2>
-                    <p className="text-gray-600 mb-4 px-2 text-lg">Se non vuoi la mela (150g), puoi mangiare:</p>
-                    
-                    <div className="grid gap-3">
-                        {fruitSubs.map((f, i) => (
-                            <div key={i} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
-                                <span className="text-xl font-medium text-gray-800">{f.name}</span>
-                                <span className="text-xl font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg">{f.amount}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Alimentare 1600 Kcal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: #ffffff; /* Sfondo bianco per layout a colonne */
+            color: #37352F;
+            -webkit-font-smoothing: antialiased;
         }
 
-        const data = activePage === 'breakfast' ? mealsData.breakfast : (activePage === 'lunch' ? mealsData.lunch : mealsData.dinner);
-        const emoji = activePage === 'breakfast' ? '☕' : (activePage === 'lunch' ? '☀️' : '🌙');
-        const title = activePage === 'breakfast' ? 'Colazione' : (activePage === 'lunch' ? 'Pranzo' : 'Cena');
+        /* Notion Sidebar Styles */
+        .sidebar {
+            background-color: #F7F7F5;
+            border-right: 1px solid #E9E9E7;
+        }
 
-        return (
-            <div className="animate-fade-in max-w-3xl mx-auto pt-6 px-4 md:px-12 pb-24 font-sans">
-                <div className="mb-8 flex items-center gap-4 border-b-2 border-gray-100 pb-4">
-                    <div className="text-5xl">{emoji}</div>
-                    <h1 className="text-4xl font-extrabold text-gray-900">{title}</h1>
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            color: #5F5E5B;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.1s ease, color 0.1s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            background-color: #EFEFED;
+            color: #37352F;
+        }
+
+        .sidebar-link.active {
+            background-color: #EFEFED;
+            color: #37352F;
+            font-weight: 600;
+        }
+
+        /* Content Styles */
+        .main-content {
+            max-width: 900px; /* Notion standard width */
+            margin: 0 auto;
+        }
+
+        .notion-card {
+            background: white;
+            border: 1px solid #E9E9E7;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            /* Box shadow più leggero per pulizia */
+            box-shadow: rgba(15, 15, 15, 0.02) 0px 0px 0px 1px, rgba(15, 15, 15, 0.05) 0px 2px 4px;
+        }
+
+        .notion-callout {
+            padding: 16px;
+            display: flex;
+            border-radius: 4px;
+            background: #F1F1EF;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #9B9A97;
+        }
+
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 16px;
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+        
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details[open] > summary {
+            border-bottom: 1px solid #F0F0F0;
+            background-color: #FAFAFA;
+            border-radius: 8px 8px 0 0;
+        }
+
+        details > summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #9B9A97;
+            font-weight: 300;
+        }
+
+        details[open] > summary::after {
+            content: '-';
+        }
+
+        details[open] {
+            padding-bottom: 8px;
+        }
+
+        .content-box {
+            padding: 16px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .food-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+        .food-item:last-child {
+            border-bottom: none;
+        }
+
+        .weight {
+            font-weight: 700;
+            color: #E16259;
+            background-color: #ffebe9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .substitution-text {
+            font-size: 0.95rem;
+            color: #686661;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        /* Sticky Header Mobile */
+        .mobile-header {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #E9E9E7;
+        }
+        
+        /* Mobile Menu Overlay */
+        #mobile-menu {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #mobile-menu.hidden {
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        #mobile-menu:not(.hidden) {
+            pointer-events: auto;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- MOBILE HEADER (Visible only on small screens) -->
+    <header class="mobile-header md:hidden fixed top-0 left-0 right-0 z-50 px-4 h-16 flex items-center justify-between">
+        <span class="font-bold text-lg">🥗 Piano 1600</span>
+        <button id="menu-btn" class="bg-gray-100 px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 active:bg-gray-200">
+            ☰ Menu
+        </button>
+    </header>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobile-menu" class="hidden fixed inset-0 bg-white z-40 pt-20 px-6 overflow-y-auto md:hidden">
+        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Navigazione</h2>
+        <nav class="space-y-2">
+            <a href="#regole" class="mobile-link block p-4 bg-gray-50 rounded-lg text-lg font-medium border border-gray-100">⚠️ Regole Importanti</a>
+            <a href="#colazione" class="mobile-link block p-4 bg-orange-50 rounded-lg text-lg font-medium border border-orange-100 text-orange-800">☕ Colazione</a>
+            <a href="#pranzo" class="mobile-link block p-4 bg-blue-50 rounded-lg text-lg font-medium border border-blue-100 text-blue-800">🍝 Pranzo</a>
+            <a href="#cena" class="mobile-link block p-4 bg-indigo-50 rounded-lg text-lg font-medium border border-indigo-100 text-indigo-800">🌙 Cena</a>
+        </nav>
+        <button id="close-menu-btn" class="mt-8 w-full py-4 text-center text-gray-400 text-sm">Chiudi Menu ✕</button>
+    </div>
+
+    <!-- SIDEBAR (Visible only on desktop/tablet) -->
+    <aside class="sidebar hidden md:flex w-64 flex-col fixed h-screen overflow-y-auto p-4 z-10">
+        <div class="mb-8 px-2 mt-4">
+            <div class="text-3xl mb-2">🥗</div>
+            <h1 class="font-bold text-gray-800 leading-tight">Piano Alimentare</h1>
+            <p class="text-xs text-gray-400 mt-1">1600 Kcal • ASST Garda</p>
+        </div>
+        
+        <nav class="space-y-1">
+            <a href="#regole" class="sidebar-link group">
+                <span class="mr-2 opacity-50 group-hover:opacity-100">⚠️</span> Regole
+            </a>
+            <a href="#colazione" class="sidebar-link group">
+                <span class="mr-2 opacity-50 group-hover:opacity-100">☕</span> Colazione
+            </a>
+            <a href="#pranzo" class="sidebar-link group">
+                <span class="mr-2 opacity-50 group-hover:opacity-100">🍝</span> Pranzo
+            </a>
+            <a href="#cena" class="sidebar-link group">
+                <span class="mr-2 opacity-50 group-hover:opacity-100">🌙</span> Cena
+            </a>
+        </nav>
+
+        <div class="mt-auto pt-8 border-t border-gray-200 px-2">
+            <p class="text-xs text-gray-400 italic">Ricorda di bere acqua regolarmente.</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 md:ml-64 p-4 md:p-12 pt-20 md:pt-12 bg-white">
+        
+        <div class="main-content space-y-12">
+
+            <!-- INTRO HEADER (Desktop only) -->
+            <div class="hidden md:block mb-8 border-b pb-8">
+                <h1 class="text-4xl font-bold mb-2">Piano Dietetico</h1>
+                <p class="text-lg text-gray-600">Guida semplificata per la gestione quotidiana dei pasti.</p>
+            </div>
+
+            <!-- SECTION: REGOLE -->
+            <section id="regole" class="scroll-mt-24">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">Regole Generali</h2>
+                <div class="notion-card p-6 bg-yellow-50 border-yellow-100">
+                    <ul class="list-disc list-inside space-y-3 text-gray-800 text-lg">
+                        <li>Le colazioni sono <strong>interscambiabili</strong>.</li>
+                        <li>Puoi associare il pranzo di un menù con la cena di un altro.</li>
+                        <li>Verdura di stagione: <strong>Libera</strong> (cruda o cotta).</li>
+                        <li>Condimento totale giornaliero: <strong>30g Olio</strong> (circa 3 cucchiai).</li>
+                    </ul>
                 </div>
+            </section>
 
-                <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-4 mb-8 border border-blue-100">
-                    <Info className="text-blue-600 flex-shrink-0 mt-1" size={28} />
-                    <div className="text-lg text-blue-900 leading-relaxed font-medium">
-                        Tocca i riquadri qui sotto per vedere i dettagli e le alternative.
-                    </div>
+            <!-- SECTION: COLAZIONE -->
+            <section id="colazione" class="scroll-mt-24">
+                <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                    <span class="text-2xl">☕</span>
+                    <h2 class="text-2xl font-bold">Colazione</h2>
                 </div>
-
-                <div className="space-y-4">
-                    {data.map((menu, idx) => (
-                        <EasyToggle key={idx} title={menu.title}>
-                            <div className="pt-2 pb-4 space-y-4">
-                                {menu.items.map((item, i) => (
-                                    <EasyItem key={i} {...item} />
-                                ))}
-                                <div className="mt-4 pt-3 border-t border-gray-100 text-lg text-gray-500 italic bg-gray-50 p-3 rounded-lg text-center">
-                                    🥗 Verdura libera a volontà
+                
+                <div class="notion-card">
+                    <details open> <!-- Default open on desktop for breakfast -->
+                        <summary class="bg-gray-50">3 Opzioni a scelta</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <p class="font-bold text-lg text-gray-800">Opzione 1 (Latte)</p>
+                                <p class="mt-1">Latte parz. scremato <span class="weight">150g</span> (o Yogurt magro 150g)</p>
+                                <p class="mt-1">Fette biscottate <span class="weight">40g</span></p>
+                                <div class="notion-callout">
+                                    <span class="text-sm">💡 <strong>Alternativa fette:</strong> 50g pane, 40g cereali, o 45g grissini.</span>
                                 </div>
                             </div>
-                        </EasyToggle>
-                    ))}
-                </div>
-            </div>
-        );
-    };
-
-    return (
-        <div className="flex h-screen w-full bg-[#f9fafb] text-gray-900 overflow-hidden">
-             {/* Stili personalizzati */}
-             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-                
-                body { font-family: 'Inter', sans-serif; }
-
-                /* Barra di scorrimento più larga e visibile */
-                ::-webkit-scrollbar { width: 12px; height: 12px; }
-                ::-webkit-scrollbar-track { background: #f1f1f1; }
-                ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 6px; border: 3px solid #f1f1f1; }
-                ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-                .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-            `}</style>
-
-            {/* HEADER MOBILE (Ben visibile) */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-20 flex items-center px-4 justify-between shadow-sm">
-                <button 
-                    onClick={toggleSidebar} 
-                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
-                >
-                    <Menu size={28} />
-                    <span className="font-bold text-lg">MENU</span>
-                </button>
-                <span className="font-bold text-lg text-gray-700">Dieta 1600</span>
-            </div>
-
-            {/* Sidebar Backdrop (Mobile) */}
-            {isSidebarOpen && (
-                <div className="fixed inset-0 bg-black/40 z-30 md:hidden backdrop-blur-sm" onClick={() => setSidebarOpen(false)}></div>
-            )}
-
-            {/* SIDEBAR (Menu Laterale) */}
-            <div className={`
-                fixed md:static inset-y-0 left-0 w-full md:w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 z-40 h-full flex flex-col shadow-2xl md:shadow-none
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            `}>
-                <div className="p-4 flex-1 overflow-y-auto">
-                    {/* Pulsante chiudi solo per mobile */}
-                    <div className="md:hidden flex justify-end mb-4">
-                        <button onClick={() => setSidebarOpen(false)} className="bg-red-100 text-red-700 p-2 rounded-full">
-                            <X size={32} />
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-3 px-4 py-4 mb-6 bg-green-50 rounded-xl border border-green-100">
-                        <div className="w-10 h-10 bg-green-500 rounded-full text-white flex items-center justify-center text-xl font-bold shadow-sm">D</div>
-                        <div>
-                            <div className="font-bold text-lg text-green-900">Dieta Personale</div>
-                            <div className="text-sm text-green-700">ASST Garda</div>
+                            <div class="food-item">
+                                <p class="font-bold text-lg text-gray-800">Opzione 2 (Tè/Caffè)</p>
+                                <p class="mt-1">Tè o Caffè (senza zucchero)</p>
+                                <p class="mt-1">Biscotti secchi <span class="weight">50g</span></p>
+                                <p class="text-sm text-gray-500 mt-1">Oppure: 50g fette biscottate / 50g cracker.</p>
+                            </div>
+                            <div class="food-item">
+                                <p class="font-bold text-lg text-gray-800">Opzione 3 (Spremuta)</p>
+                                <p class="mt-1">Spremuta d'arancia/pompelmo <span class="weight">150g</span></p>
+                                <p class="mt-1">Cracker <span class="weight">25g</span></p>
+                                <p class="text-sm text-gray-500 mt-1">Oppure: 35g pane / 30g grissini.</p>
+                            </div>
                         </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- SECTION: PRANZI -->
+            <section id="pranzo" class="scroll-mt-24">
+                <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                    <span class="text-2xl">🍝</span>
+                    <h2 class="text-2xl font-bold">Pranzo</h2>
+                </div>
+
+                <!-- MENU 1 -->
+                <div class="notion-card">
+                    <details>
+                        <summary>Menù 1: Pasta & Tacchino</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Primo</span>
+                                <p class="text-lg text-gray-900">Pasta al pomodoro <span class="weight">80g</span> + 5g Parmigiano</p>
+                                <div class="substitution-text">🔄 Oppure: 80g Riso, 200g Gnocchi, 240g Polenta.</div>
+                            </div>
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Secondo</span>
+                                <p class="text-lg text-gray-900">Petto di Tacchino <span class="weight">80g</span></p>
+                                <div class="substitution-text">🔄 Oppure: 120g Carne magra, 140g Pesce magro, 60g Affettato.</div>
+                            </div>
+                            <div class="food-item">
+                                <p>Verdura libera + Mela <span class="weight">150g</span> + Pane <span class="weight">40g</span></p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- MENU 2 -->
+                <div class="notion-card">
+                    <details>
+                        <summary>Menù 2: Minestra & Vitellone</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Primo</span>
+                                <p class="text-lg text-gray-900">Pasta in brodo <span class="weight">40g</span> + 5g Parmigiano</p>
+                                <div class="substitution-text">🔄 Oppure: 180g Passato verdura, 40g Riso.</div>
+                            </div>
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Secondo</span>
+                                <p class="text-lg text-gray-900">Vitellone <span class="weight">80g</span></p>
+                                <div class="substitution-text">🔄 Oppure: 80g Carni magre, 100g Pesce magro.</div>
+                            </div>
+                            <div class="food-item">
+                                <p>Verdura libera + Mela <span class="weight">150g</span> + Pane <span class="weight">100g</span></p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- MENU 3 -->
+                <div class="notion-card">
+                    <details>
+                        <summary>Menù 3: Pasta e Fagioli & Trota</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Primo</span>
+                                <p class="text-lg text-gray-900">Pasta <span class="weight">50g</span> + Fagioli secchi <span class="weight">30g</span></p>
+                            </div>
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Secondo</span>
+                                <p class="text-lg text-gray-900">Trota <span class="weight">110g</span></p>
+                            </div>
+                            <div class="food-item">
+                                <p>Verdura libera + Mela <span class="weight">150g</span> + Pane <span class="weight">70g</span></p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- MENU 4 -->
+                <div class="notion-card">
+                    <details>
+                        <summary>Menù 4: Tortellini & Prosciutto</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Primo</span>
+                                <p class="text-lg text-gray-900">Tortellini <span class="weight">110g</span></p>
+                            </div>
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Secondo</span>
+                                <p class="text-lg text-gray-900">Prosciutto crudo magro <span class="weight">20g</span></p>
+                            </div>
+                            <div class="food-item">
+                                <p>Verdura libera + Mela <span class="weight">300g</span> + Pane <span class="weight">60g</span></p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- MENU 5 -->
+                <div class="notion-card">
+                    <details>
+                        <summary>Menù 5: Riso & Sogliola</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Primo</span>
+                                <p class="text-lg text-gray-900">Riso al pomodoro <span class="weight">80g</span> + 5g Parmigiano</p>
+                            </div>
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Secondo</span>
+                                <p class="text-lg text-gray-900">Sogliola ai ferri <span class="weight">100g</span></p>
+                            </div>
+                            <div class="food-item">
+                                <p>Verdura libera + Mela <span class="weight">150g</span> + Pane <span class="weight">40g</span></p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                 <!-- MENU 6 -->
+                 <div class="notion-card">
+                    <details>
+                        <summary>Menù 6: Pasto Freddo</summary>
+                        <div class="content-box">
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Principale</span>
+                                <p class="text-lg text-gray-900">Pane <span class="weight">150g</span></p>
+                            </div>
+                            <div class="food-item">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Secondo</span>
+                                <p class="text-lg text-gray-900">Prosciutto cotto magro <span class="weight">100g</span></p>
+                                <div class="substitution-text">🔄 Oppure: 80g Formaggi, 200g Ricotta.</div>
+                            </div>
+                            <div class="food-item">
+                                <p>Verdura libera + Mela <span class="weight">150g</span></p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- SECTION: CENE -->
+            <section id="cena" class="scroll-mt-24">
+                <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                    <span class="text-2xl">🌙</span>
+                    <h2 class="text-2xl font-bold">Cena</h2>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- CENA 1 -->
+                    <div class="notion-card">
+                        <details>
+                            <summary>Cena 1: Minestra & Crudo</summary>
+                            <div class="content-box">
+                                <p class="mb-2"><strong>1°:</strong> Pasta in brodo <span class="weight">40g</span></p>
+                                <p class="mb-2"><strong>2°:</strong> Prosciutto Crudo magro <span class="weight">70g</span></p>
+                                <p class="text-sm border-t pt-2 mt-2">Verdura libera + Mela 150g + Pane <span class="weight">40g</span></p>
+                            </div>
+                        </details>
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="text-sm font-bold text-gray-400 px-4 mb-2 uppercase tracking-widest">Sezioni</div>
-                        <BigSidebarItem 
-                            icon="📖" 
-                            label="Introduzione" 
-                            active={activePage === 'intro'} 
-                            onClick={() => { setActivePage('intro'); setSidebarOpen(false); }} 
-                        />
-                        <BigSidebarItem 
-                            icon="☕" 
-                            label="Colazione" 
-                            active={activePage === 'breakfast'} 
-                            onClick={() => { setActivePage('breakfast'); setSidebarOpen(false); }} 
-                        />
-                        <BigSidebarItem 
-                            icon="☀️" 
-                            label="Pranzo" 
-                            active={activePage === 'lunch'} 
-                            onClick={() => { setActivePage('lunch'); setSidebarOpen(false); }} 
-                        />
-                        <BigSidebarItem 
-                            icon="🌙" 
-                            label="Cena" 
-                            active={activePage === 'dinner'} 
-                            onClick={() => { setActivePage('dinner'); setSidebarOpen(false); }} 
-                        />
+                    <!-- CENA 2 -->
+                    <div class="notion-card">
+                        <details>
+                            <summary>Cena 2: Zuppa & Mozzarella</summary>
+                            <div class="content-box">
+                                <p class="mb-2"><strong>1°:</strong> Zuppa verdura <span class="weight">180g</span> + Riso <span class="weight">20g</span></p>
+                                <p class="mb-2"><strong>2°:</strong> Mozzarella <span class="weight">100g</span></p>
+                                <p class="text-sm border-t pt-2 mt-2">Verdura libera + Mela 150g + Pane <span class="weight">60g</span></p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- CENA 3 -->
+                    <div class="notion-card">
+                        <details>
+                            <summary>Cena 3: Riso & Parmigiano</summary>
+                            <div class="content-box">
+                                <p class="mb-2"><strong>1°:</strong> Riso in brodo <span class="weight">40g</span></p>
+                                <p class="mb-2"><strong>2°:</strong> Parmigiano <span class="weight">50g</span></p>
+                                <p class="text-sm border-t pt-2 mt-2">Verdura libera + Mela 150g + Pane <span class="weight">40g</span></p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- CENA 4 -->
+                    <div class="notion-card">
+                        <details>
+                            <summary>Cena 4: Minestra & Vitello</summary>
+                            <div class="content-box">
+                                <p class="mb-2"><strong>1°:</strong> Pasta in brodo <span class="weight">40g</span></p>
+                                <p class="mb-2"><strong>2°:</strong> Vitello ai ferri <span class="weight">120g</span></p>
+                                <p class="text-sm border-t pt-2 mt-2">Verdura libera + Mela 150g + Pane <span class="weight">50g</span></p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- CENA 5 -->
+                    <div class="notion-card">
+                        <details>
+                            <summary>Cena 5: Pasta & Cotto</summary>
+                            <div class="content-box">
+                                <p class="mb-2"><strong>1°:</strong> Pasta al pomodoro <span class="weight">60g</span></p>
+                                <p class="mb-2"><strong>2°:</strong> Prosciutto Cotto magro <span class="weight">60g</span></p>
+                                <p class="text-sm border-t pt-2 mt-2">Verdura libera + Mela 150g + Pane <span class="weight">30g</span></p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- CENA 6 -->
+                    <div class="notion-card">
+                        <details>
+                            <summary>Cena 6: Pizza!</summary>
+                            <div class="content-box">
+                                <div class="notion-callout"><span>🎉 Serata Libera</span></div>
+                                <p class="mb-1">Pizza Margherita/Verdure <span class="weight">160g</span></p>
+                                <p>Prosciutto cotto magro <span class="weight">60g</span></p>
+                                <p class="text-xs text-gray-400 mt-2">No pane/frutta extra.</p>
+                            </div>
+                        </details>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* AREA CONTENUTO PRINCIPALE */}
-            <div className="flex-1 overflow-y-auto h-full relative scroll-smooth bg-[#f9fafb] mt-16 md:mt-0">
-                {renderContent()}
-            </div>
-        </div>
-    );
-};
-
-// --- COMPONENTI ADATTATI PER SENIOR ---
-
-const EasyToggle = ({ title, children, defaultOpen = false }) => {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
-
-    return (
-        <div className="mb-4 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between p-5 text-left transition-colors ${isOpen ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'}`}
-            >
-                <span className="font-bold text-xl text-gray-800">{title}</span>
-                <div className={`p-2 rounded-full ${isOpen ? 'bg-gray-200 text-gray-700' : 'bg-green-100 text-green-700'}`}>
-                    {isOpen ? <Minus size={28} /> : <Plus size={28} />}
-                </div>
-            </button>
+            <div class="h-20"></div> <!-- Spacer footer -->
             
-            {isOpen && (
-                <div className="p-5 border-t border-gray-100 bg-white">
-                    {children}
-                </div>
-            )}
         </div>
-    );
-};
+    </main>
 
-const EasyItem = ({ name, amount, subs }) => {
-    const [showSubs, setShowSubs] = useState(false);
-    const hasSubs = subs && subs.length > 0;
-    
-    return (
-        <div className="mb-4 last:mb-0">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <div className="mb-2 sm:mb-0">
-                    <div className="font-bold text-xl text-gray-900">{name}</div>
-                    {hasSubs && (
-                        <button 
-                            onClick={() => setShowSubs(!showSubs)}
-                            className="text-blue-600 font-semibold text-lg mt-1 flex items-center gap-1 hover:underline"
-                        >
-                            {showSubs ? "Nascondi alternative" : "Vedi alternative"}
-                            <ChevronRight size={20} className={`transform transition-transform ${showSubs ? 'rotate-90' : ''}`} />
-                        </button>
-                    )}
-                </div>
-                <div className="self-start sm:self-center bg-white border border-gray-200 px-4 py-2 rounded-lg font-mono font-bold text-lg text-gray-700 shadow-sm whitespace-nowrap">
-                    {amount}
-                </div>
-            </div>
+    <!-- Simple Script for Mobile Menu -->
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
 
-            {hasSubs && showSubs && (
-                <div className="mt-2 ml-4 pl-4 border-l-4 border-blue-200 space-y-2 py-2 animate-fade-in">
-                    <div className="text-gray-500 font-bold uppercase text-sm tracking-wide mb-2">Puoi sostituire con:</div>
-                    {subs.map((sub, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
-                            <CornerDownRight size={24} className="text-blue-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-lg text-gray-800 leading-tight">{sub}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
+        function toggleMenu() {
+            mobileMenu.classList.toggle('hidden');
+            // Toggle body scroll
+            if (!mobileMenu.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
 
-const BigSidebarItem = ({ icon, label, active, onClick }) => (
-    <button 
-        onClick={onClick}
-        className={`w-full flex items-center gap-4 px-4 py-5 mx-2 rounded-xl transition-all duration-200
-        ${active 
-            ? 'bg-green-100 text-green-900 shadow-sm border border-green-200' 
-            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
-    >
-        <span className="text-3xl">{icon}</span>
-        <span className={`text-xl font-bold ${active ? 'text-green-900' : 'text-gray-700'}`}>{label}</span>
-        {active && <ChevronRight className="ml-auto text-green-600" size={24} />}
-    </button>
-);
+        menuBtn.addEventListener('click', toggleMenu);
+        closeMenuBtn.addEventListener('click', toggleMenu);
 
-export default App;
+        // Close menu when clicking a link
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', toggleMenu);
+        });
+    </script>
+</body>
+</html>
